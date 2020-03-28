@@ -164,7 +164,7 @@ def train_ml_multi_online(network, input_train, output_train, input_test, output
                     'network': network,
                     'timestep': s+1,
                     'acc_train': acc_train[p_idx],
-                    'loss_output_train': loss_output_train[p_idx], 
+                    'loss_output_train': torch.Tensor([loss_output_train[p_idx]]), 
                     'spikenum_hid_train': spikenum_hid_train[p_idx],
                     'spikenum_output_train': spikenum_output_train[p_idx],
                 }
@@ -343,7 +343,7 @@ def train_ml_multi_online_ls(network, input_train, output_train, input_test, out
                     'network': network,
                     'timestep': s+1,
                     'acc_train': acc_train[p_idx],
-                    'loss_output_train': loss_output_train[p_idx], 
+                    'loss_output_train': torch.Tensor([loss_output_train[p_idx]]), 
                     'spikenum_hid_train': spikenum_hid_train[p_idx],
                     'spikenum_output_train': spikenum_output_train[p_idx],
                 }
@@ -501,7 +501,7 @@ def train_ml_multi_elbo_online(network, input_train, output_train, input_test, o
                     'network': network,
                     'timestep': s+1,
                     'acc_train': acc_train[p_idx],
-                    'loss_output_train': loss_output_train[p_idx], 
+                    'loss_output_train': torch.Tensor([loss_output_train[p_idx]]), 
                     'spikenum_hid_train': spikenum_hid_train[p_idx],
                     'spikenum_output_train': spikenum_output_train[p_idx],
                 }
@@ -659,7 +659,7 @@ def train_ml_multi_nols_online(network, input_train, output_train, input_test, o
                     'network': network,
                     'timestep': s+1,
                     'acc_train': acc_train[p_idx],
-                    'loss_output_train': loss_output_train[p_idx], 
+                    'loss_output_train': torch.Tensor([loss_output_train[p_idx]]), 
                     'spikenum_hid_train': spikenum_hid_train[p_idx],
                     'spikenum_output_train': spikenum_output_train[p_idx],
                 }

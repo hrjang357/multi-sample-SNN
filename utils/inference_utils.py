@@ -86,7 +86,11 @@ def get_loss_bound(network, input_sequence, output_sequence, num_samples, traini
         loss_bound = torch.sum( normalized_weight * temp_weight, dim=0 )
     
     loss_bound /= epochs
-    
+
+    loss_bound = torch.Tensor([loss_bound])
+    spikenum_hid_inference = torch.Tensor([spikenum_hid_inference])
+    spikenum_output_inference = torch.Tensor([spikenum_output_inference])
+
     return loss_bound, spikenum_hid_inference, spikenum_output_inference
 
 
@@ -153,6 +157,11 @@ def get_distance(network, input_sequence, output_sequence, num_samples, training
     distance_avg = distance_avg/(S*network.n_output_neurons*num_samples)
     distance_ref = distance_ref/(S*network.n_output_neurons)
     
+    distance_avg = torch.Tensor([distance_avg])
+    distance_ref = torch.Tensor([distance_ref])
+    spikenum_hid_inference = torch.Tensor([spikenum_hid_inference])
+    spikenum_output_inference = torch.Tensor([spikenum_output_inference])
+
     return distance_avg, distance_ref, spikenum_hid_inference, spikenum_output_inference
 
 
