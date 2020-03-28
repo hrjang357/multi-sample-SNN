@@ -1,0 +1,16 @@
+.vscode/*
+__pycache__/*
+.ipynb_checkpoints/*
+log/*
+results/*
+results_cluster/*
+results_old/*
+.DS_Store
+bk_files/
+plot_snn/.ipynb_checkpoints/
+plot_snn/res_example/
+runs/*
+runs_old/*
+utils/__pycache__/
+test/
+script_*.sh
