@@ -14,3 +14,8 @@ runs_old/*
 utils/__pycache__/
 test/
 script_*.sh
+results_temperature/*
+plot_snn/__pycache__/
+results_vowel/*
+k1775597
+*bk*

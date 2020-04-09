@@ -109,6 +109,7 @@ def get_distance(network, input_sequence, output_sequence, num_samples, training
     # compute distance(A,B) = 1/constant * sum_t (filtered_output_A(t) - filtered_output_B(t))^2
     distance_avg = 0
     distance_ref = 0
+    distance_fix = 0
 
     network.set_mode('inference')
     network.reset_internal_state()
@@ -124,8 +125,12 @@ def get_distance(network, input_sequence, output_sequence, num_samples, training
     output_fb_trace_inference = torch.zeros([num_samples, network.n_output_neurons, network.alphabet_size, S_prime])
     spikenum_hid_inference = 0
     spikenum_output_inference = 0
+    spikenum_hid_ref = 0
+    spikenum_hid_fix = 0
     output_spikes_inference = torch.zeros([num_samples, network.n_output_neurons, network.alphabet_size, S_prime])
     output_spikes_reference = torch.zeros([network.n_output_neurons, network.alphabet_size, S_prime])
+    hid_spikes_inference = torch.zeros([num_samples, network.n_hidden_neurons, network.alphabet_size, S_prime])
+    hid_spikes_reference = torch.zeros([network.n_hidden_neurons, network.alphabet_size, S_prime])
         
     for s in range(S):
          
@@ -138,6 +143,7 @@ def get_distance(network, input_sequence, output_sequence, num_samples, training
                 
             training_params_list[k].log_proba = network_list[k](input_sequence[int(s / S_prime), :, :, s % S_prime])
             output_spikes_inference[k, :, :, s % S_prime] = network_list[k].spiking_history[network_list[k].output_neurons, :, -1]
+            hid_spikes_inference[k, :, :, s % S_prime] = network_list[k].spiking_history[network_list[k].hidden_neurons, :, -1]
 
             output_fb_trace_inference[k, :, :, s % S_prime] = network_list[k].compute_fb_trace(network_list[k].spiking_history)[network_list[k].output_neurons, :].reshape(network.n_output_neurons, network.alphabet_size)
             
@@ -150,19 +156,28 @@ def get_distance(network, input_sequence, output_sequence, num_samples, training
                
         output_spikes_reference[:, :, s % S_prime] = (torch.sum(output_spikes_inference[:, :, :, s % S_prime], dim=0) > int(num_samples/2)).float()
         output_fb_trace_reference[:, :, s % S_prime] = network.compute_fb_trace(output_spikes_reference[:, :, max(0, s%S_prime -9):s%S_prime+1]).reshape(network.n_output_neurons, network.alphabet_size)
+        hid_spikes_reference[:, :, s % S_prime] = (torch.sum(hid_spikes_inference[:, :, :, s % S_prime], dim=0) > int(num_samples/2)).float()
     
+        spikenum_hid_ref += torch.nonzero(hid_spikes_reference[:, :, s % S_prime]).shape[0]
+        spikenum_hid_fix += torch.nonzero(network_list[0].spiking_history[network_list[0].hidden_neurons, :, -1]).shape[0]
+
         if s % S_prime == S_prime - 1:
             distance_ref += torch.sum(torch.pow(output_fb_trace_target - output_fb_trace_reference, 2), dim=(0,-1))
+            distance_fix += torch.sum(torch.pow(output_fb_trace_target[:, :, :] - output_fb_trace_inference[0, :, :, :],2), dim=(0,-1))
     
     distance_avg = distance_avg/(S*network.n_output_neurons*num_samples)
     distance_ref = distance_ref/(S*network.n_output_neurons)
+    distance_fix = distance_fix/(S*network.n_output_neurons)
     
     distance_avg = torch.Tensor([distance_avg])
     distance_ref = torch.Tensor([distance_ref])
+    distance_fix = torch.Tensor([distance_fix])
     spikenum_hid_inference = torch.Tensor([spikenum_hid_inference])
     spikenum_output_inference = torch.Tensor([spikenum_output_inference])
+    spikenum_hid_ref = torch.Tensor([spikenum_hid_ref])
+    spikenum_hid_fix = torch.Tensor([spikenum_hid_fix])
 
-    return distance_avg, distance_ref, spikenum_hid_inference, spikenum_output_inference
+    return distance_avg, distance_ref, distance_fix, spikenum_hid_inference, spikenum_output_inference, spikenum_hid_ref, spikenum_hid_fix
 
 
 def get_inference(network, input_sequence, output_sequence, dec_type, num_ll_est, writer=None):

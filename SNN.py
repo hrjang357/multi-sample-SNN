@@ -9,7 +9,7 @@ from torch.distributions import constraints
 class SNNetwork(torch.nn.Module):
     
     def __init__(self, n_input_neurons, n_hidden_neurons, n_output_neurons, topology, alphabet_size, n_basis_feedforward=1, feedforward_filter=filters.base_feedforward_filter,
-                 n_basis_feedback=1, feedback_filter=filters.base_feedback_filter, tau_ff=1, tau_fb=1, mu=1, weights_magnitude=0.1, task='supervised', mode='train_ml',
+                 n_basis_feedback=1, feedback_filter=filters.base_feedback_filter, tau_ff=1, tau_fb=1, mu=1, weights_magnitude=0.1, task='supervised', mode='train_ml', temperature=1,
                  save_path=None):
 
         super(SNNetwork, self).__init__()
@@ -87,6 +87,9 @@ class SNNetwork(torch.nn.Module):
         self.feedforward_filter = feedforward_filter(tau_fb, self.n_basis_feedforward, mu)
         self.tau_ff = tau_ff
 
+        # here temperature
+        self.temperature = temperature
+
 
         ### Feedback weights
         self.n_basis_feedback = n_basis_feedback
@@ -123,8 +126,9 @@ class SNNetwork(torch.nn.Module):
         assert self.n_neurons == (len(self.input_neurons) + len(self.hidden_neurons) + len(self.output_neurons)), "The numbers of neurons don't match"
         assert self.n_neurons == (len(self.learnable_neurons) + len(self.non_learnable_neurons)), "The numbers of neurons don't match"
 
-        ### Compute potential
+        ### Compute potential # here with temperature constant
         self.potential = self.compute_ff_potential() + self.compute_fb_potential() + self.bias
+        self.potential = self.potential / self.temperature
 
         ### Update spiking history
         self.spiking_history = self.update_spiking_history(input_signal)
@@ -213,6 +217,11 @@ class SNNetwork(torch.nn.Module):
         #assert new_tau.shape == self.tau_ff.shape, 'Wrong shape, got ' + str(new_tau.shape) + ', expected' + str(self.tau_ff.shape)
         self.tau_ff = new_tau
         self.tau_fb = new_tau
+        return
+
+    def set_temperature(self, new_temperature):
+        self.temperature = new_temperature
+        print(self.temperature)
         return
 
 

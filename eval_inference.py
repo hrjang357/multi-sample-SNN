@@ -28,7 +28,7 @@ def evaluate_from_inference(path_dir, dataset_path, overwrite, query, tau):
                 # print(filename[0])
                 continue
 
-        print('Start calculate for', filename[0])
+        print('Start calculate for', filename[0], flush=True)
 
         # store the hyperparameters from filename to dictionary
         hp = dict()
@@ -62,18 +62,24 @@ def evaluate_from_inference(path_dir, dataset_path, overwrite, query, tau):
         loss_bound_train, _, _ = get_loss_bound(network, i_train, o_train, hp['Nk'], mode)
         loss_bound_test, _, _ = get_loss_bound(network, i_test, o_test, hp['Nk'], mode)
         
-        d_avg_train, d_majority_train, spikenum_hid_train, _ = get_distance(network, i_train, o_train, hp['Nk'], mode)
-        d_avg_test, d_majority_test, spikenum_hid_test, _ = get_distance(network, i_test, o_test, hp['Nk'], mode)
+        d_avg_train, d_majority_train, d_fix_train, spikenum_hid_train, _, spikenum_hid_majority_train, spikenum_hid_fix_train = get_distance(network, i_train, o_train, hp['Nk'], mode)
+        d_avg_test, d_majority_test, d_fix_test, spikenum_hid_test, _, spikenum_hid_majority_test, spikenum_hid_fix_test = get_distance(network, i_test, o_test, hp['Nk'], mode)
 
         result_dict = dict()
         result_dict['loss_bound_train'] = loss_bound_train
         result_dict['loss_bound_test'] = loss_bound_test
         result_dict['d_avg_train'] = d_avg_train
         result_dict['d_majority_train'] = d_majority_train
+        result_dict['d_fix_train'] = d_fix_train
         result_dict['spikenum_hid_train'] = spikenum_hid_train
+        result_dict['spikenum_hid_majority_train'] = spikenum_hid_majority_train
+        result_dict['spikenum_hid_fix_train'] = spikenum_hid_fix_train
         result_dict['d_avg_test'] = d_avg_test
         result_dict['d_majority_test'] = d_majority_test
+        result_dict['d_fix_test'] = d_fix_test
         result_dict['spikenum_hid_test'] = spikenum_hid_test
+        result_dict['spikenum_hid_majority_test'] = spikenum_hid_majority_test
+        result_dict['spikenum_hid_fix_test'] = spikenum_hid_fix_test
 
         save_path = os.path.join(path_dir, eval_filename)
         torch.save(result_dict, save_path)
